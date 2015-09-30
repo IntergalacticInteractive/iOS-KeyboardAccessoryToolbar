@@ -8,7 +8,15 @@
 
 import UIKit
 
+protocol KeyboardAccessoryToolbarDelegate {
+    func donePressed()
+    func cancelPressed()
+}
+
 class KeyboardAccessoryToolbar: UIToolbar {
+    
+    var toolbarDelegate:KeyboardAccessoryToolbarDelegate?
+    
     private static let toolBarHeight: CGFloat = 44
     
     // MARK: - Initialization
@@ -28,9 +36,10 @@ class KeyboardAccessoryToolbar: UIToolbar {
     
     // MARK: - Custom bar items
     func addBarItems() {
+        let cancelBarButton = UIBarButtonItem(barButtonSystemItem: UIBarButtonSystemItem.Cancel, target: nil, action: Selector("cancel"))
         let flexibleSpace = UIBarButtonItem(barButtonSystemItem: UIBarButtonSystemItem.FlexibleSpace, target: nil, action: nil)
         let doneBarButton = UIBarButtonItem(barButtonSystemItem: UIBarButtonSystemItem.Done, target: self, action: Selector("done"))
-        items = [flexibleSpace, doneBarButton]
+        items = [cancelBarButton, flexibleSpace, doneBarButton]
     }
     
     func done() {
@@ -43,11 +52,23 @@ class KeyboardAccessoryToolbar: UIToolbar {
         } else if let textView = currentView as? UITextView {
             shouldReturn = textView.delegate?.textViewShouldEndEditing?(textView) ?? shouldReturn
         }
-
+        
         if shouldReturn {
             println("shouldReturn")
             // If delegate allow currentView to end editing, then resign as first responder
             currentView?.resignFirstResponder()
+        }
+        if let del = self.toolbarDelegate as KeyboardAccessoryToolbarDelegate?
+        {
+            del.donePressed()
+        }
+    }
+    
+    func cancel() {
+        currentView?.resignFirstResponder()
+        if let del = self.toolbarDelegate as KeyboardAccessoryToolbarDelegate?
+        {
+            del.cancelPressed()
         }
     }
     
@@ -68,8 +89,8 @@ class KeyboardAccessoryToolbar: UIToolbar {
     // Only override drawRect: if you perform custom drawing.
     // An empty implementation adversely affects performance during animation.
     override func drawRect(rect: CGRect) {
-        // Drawing code
+    // Drawing code
     }
     */
-
+    
 }
